@@ -1,0 +1,16 @@
+services:
+  bili-cache-watch:
+    build: .
+    ports:
+      - "3001:3001"
+    environment:
+      PORT: "3001"
+      BILI_INVITE_CODE: "reeshiram-YuBirdSing-202605"
+      BILI_AUTH_SECRET: "${BILI_AUTH_SECRET:?set BILI_AUTH_SECRET before starting}"
+      CHECK_INTERVAL_MINUTES: "60"
+    volumes:
+      - bili-cache-data:/app/data
+    restart: unless-stopped
+
+volumes:
+  bili-cache-data:

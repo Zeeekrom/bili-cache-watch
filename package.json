@@ -1,0 +1,29 @@
+{
+  "name": "bili-cache-watch",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --experimental-sqlite src/server.js",
+    "start": "node --experimental-sqlite src/server.js",
+    "check": "node --experimental-sqlite src/check-now.js",
+    "android:devices": "adb devices -l",
+    "android:inspect": "node --experimental-sqlite src/appium/inspect.js",
+    "import:android": "node --experimental-sqlite src/appium/import-cache.js",
+    "appium:setup": "appium driver install uiautomator2@4.2.9",
+    "appium:start": "appium --base-path /wd/hub"
+  },
+  "dependencies": {
+    "@ffmpeg-installer/ffmpeg": "^1.1.0",
+    "appium": "^2.19.0",
+    "danmaku": "^2.0.9",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "fast-xml-parser": "^5.8.0",
+    "node-cron": "^4.2.1",
+    "webdriverio": "^9.20.0"
+  },
+  "devDependencies": {
+    "appium-uiautomator2-driver": "^4.2.9"
+  }
+}
