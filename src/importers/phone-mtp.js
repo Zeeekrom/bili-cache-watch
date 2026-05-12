@@ -11,7 +11,7 @@ const phoneImportRoot = join(dataDir, 'phone-import');
 
 export function importFromPhoneMtp(sourcePath) {
   if (!sourcePath || typeof sourcePath !== 'string') {
-    throw new Error('请填写手机缓存路径');
+    throw new Error('Enter the phone cache path.');
   }
 
   mkdirSync(phoneImportRoot, { recursive: true });
@@ -42,10 +42,10 @@ export function importFromPhoneMtp(sourcePath) {
   } catch (error) {
     const debugPath = join(dataDir, 'phone-mtp-last-output.txt');
     writeFileSync(debugPath, raw, 'utf8');
-    throw new Error(`手机复制脚本返回内容无法解析，已保存到 ${debugPath}：${error.message}`);
+    throw new Error(`Phone copy script returned unparsable output. Saved debug output to ${debugPath}: ${error.message}`);
   }
   if (!copyResult.ok) {
-    throw new Error(copyResult.error || '手机缓存复制失败');
+    throw new Error(copyResult.error || 'Phone cache copy failed');
   }
 
   const copiedPath = resolveCopiedPath(copyResult.destination);
@@ -75,7 +75,7 @@ function resolveCopiedPath(pathFromScript) {
     .sort((a, b) => statSync(b).mtimeMs - statSync(a).mtimeMs)[0];
 
   if (!latest) {
-    throw new Error('手机缓存复制完成，但没有找到本地复制目录');
+    throw new Error('Phone cache copy finished, but the local copied folder was not found');
   }
 
   return latest;

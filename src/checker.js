@@ -1,20 +1,20 @@
 import { listVideos, updateCheckResult } from './db.js';
 
 const REMOVED_PATTERNS = [
-  '视频不见了',
-  '稿件不可见',
-  '视频已失效',
-  '视频已删除',
-  '不存在',
+  '\u89c6\u9891\u4e0d\u89c1\u4e86',
+  '\u7a3f\u4ef6\u4e0d\u53ef\u89c1',
+  '\u89c6\u9891\u5df2\u5931\u6548',
+  '\u89c6\u9891\u5df2\u5220\u9664',
+  '\u4e0d\u5b58\u5728',
   '404'
 ];
 
 const RESTRICTED_PATTERNS = [
-  '权限不足',
-  '仅限',
-  '暂时无法观看',
-  '地区限制',
-  '审核'
+  '\u6743\u9650\u4e0d\u8db3',
+  '\u4ec5\u9650',
+  '\u6682\u65f6\u65e0\u6cd5\u89c2\u770b',
+  '\u5730\u533a\u9650\u5236',
+  '\u5ba1\u6838'
 ];
 
 const BILI_VIEW_API = 'https://api.bilibili.com/x/web-interface/view';
@@ -42,7 +42,7 @@ export async function checkVideo(video) {
     if (response.ok && (pageText.includes(`"bvid":"${video.bvid}"`) || titleText.includes(video.bvid))) {
       return {
         status: 'available',
-        detail: `页面可访问，HTTP ${response.status}`,
+        detail: `Page is accessible, HTTP ${response.status}`,
         httpStatus: response.status
       };
     }
@@ -50,7 +50,7 @@ export async function checkVideo(video) {
     if (response.status === 404 || containsAny(titleText, REMOVED_PATTERNS)) {
       return {
         status: 'removed',
-        detail: `页面显示疑似删除或不可见，HTTP ${response.status}`,
+        detail: `Page appears removed or unavailable, HTTP ${response.status}`,
         httpStatus: response.status
       };
     }
@@ -58,7 +58,7 @@ export async function checkVideo(video) {
     if (response.status === 403 || containsAny(titleText, RESTRICTED_PATTERNS)) {
       return {
         status: 'restricted',
-        detail: `页面存在但疑似受限，HTTP ${response.status}`,
+        detail: `Page exists but appears restricted, HTTP ${response.status}`,
         httpStatus: response.status
       };
     }
@@ -66,7 +66,7 @@ export async function checkVideo(video) {
     if (!response.ok) {
       return {
         status: 'error',
-        detail: `请求异常，HTTP ${response.status}`,
+        detail: `Request failed, HTTP ${response.status}`,
         httpStatus: response.status
       };
     }
@@ -74,14 +74,14 @@ export async function checkVideo(video) {
     if (!pageText.includes(video.bvid)) {
       return {
         status: 'unknown',
-        detail: '页面可访问，但未在页面源码中确认 BV 号',
+        detail: 'Page is accessible, but the BV ID was not confirmed in the page source',
         httpStatus: response.status
       };
     }
 
     return {
       status: 'available',
-      detail: `页面可访问，HTTP ${response.status}`,
+      detail: `Page is accessible, HTTP ${response.status}`,
       httpStatus: response.status
     };
   } catch (error) {
@@ -118,7 +118,7 @@ async function checkVideoViaApi(bvid) {
   if (!response.ok) {
     return {
       status: 'unknown',
-      detail: `接口请求异常，HTTP ${response.status}`,
+      detail: `API request failed, HTTP ${response.status}`,
       httpStatus: response.status
     };
   }
@@ -128,7 +128,7 @@ async function checkVideoViaApi(bvid) {
   if (payload.code === 0 && payload.data?.bvid === bvid) {
     return {
       status: 'available',
-      detail: `接口确认正常：${payload.data.title || bvid}`,
+      detail: `API confirmed available: ${payload.data.title || bvid}`,
       title: payload.data.title || null,
       coverUrl: payload.data.pic || null,
       httpStatus: response.status
@@ -138,7 +138,7 @@ async function checkVideoViaApi(bvid) {
   if ([-400, -404, 62002].includes(payload.code)) {
     return {
       status: 'removed',
-      detail: `接口显示不可见：${payload.message || payload.code}`,
+      detail: `API reports unavailable: ${payload.message || payload.code}`,
       httpStatus: response.status
     };
   }
@@ -146,14 +146,14 @@ async function checkVideoViaApi(bvid) {
   if ([62004, 62012].includes(payload.code)) {
     return {
       status: 'restricted',
-      detail: `接口显示受限：${payload.message || payload.code}`,
+      detail: `API reports restricted: ${payload.message || payload.code}`,
       httpStatus: response.status
     };
   }
 
   return {
     status: 'unknown',
-    detail: `接口返回未识别状态：${payload.message || payload.code}`,
+    detail: `API returned an unrecognized status: ${payload.message || payload.code}`,
     httpStatus: response.status
   };
 }

@@ -26,12 +26,12 @@ export function importFromAndroidDownloadEntries() {
 
 export function importFromLocalCachePath(inputPath, source = 'local-cache') {
   if (!inputPath || typeof inputPath !== 'string') {
-    throw new Error('请填写本地缓存目录路径');
+    throw new Error('Enter a local cache folder path.');
   }
 
   const root = resolve(inputPath);
   if (!existsSync(root)) {
-    throw new Error(`路径不存在：${root}`);
+    throw new Error(`Path does not exist: ${root}`);
   }
 
   const paths = findLocalEntryPaths(root);
@@ -101,7 +101,7 @@ function parseEntryJson(raw, path) {
   const entry = JSON.parse(raw);
   const bvid = entry.bvid || avidToBvid(entry.avid);
   if (!bvid) {
-    throw new Error('entry.json 中没有 bvid 或 avid');
+    throw new Error('entry.json does not contain bvid or avid');
   }
 
   return {

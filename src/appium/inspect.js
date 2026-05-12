@@ -21,8 +21,8 @@ try {
   console.log('\nVisible controls:');
   console.log(summarizeNodes(nodes).join('\n'));
 
-  if (!text.includes('缓存') && !text.toLowerCase().includes('download')) {
-    console.log('\nHint: 当前页面不像缓存列表。请在模拟器里手动进入 Bilibili 的缓存/离线缓存页后再运行导入。');
+  if (!text.includes('\u7f13\u5b58') && !text.toLowerCase().includes('download')) {
+    console.log('\nHint: The current screen does not look like the cache list. Open the Bilibili cache/offline cache page in the emulator, then run the import again.');
   }
 } finally {
   await client.deleteSession();

@@ -41,9 +41,9 @@ export async function assertAppiumServer() {
     }
   } catch {
     throw new Error([
-      '无法连接 Appium 服务。',
-      '请先运行：npm run appium:start',
-      '然后保持该终端打开，再另开终端运行 android:inspect 或 import:android。'
+      'Cannot connect to the Appium server.',
+      'Run: npm run appium:start',
+      'Keep that terminal open, then run android:inspect or import:android from another terminal.'
     ].join('\n'));
   }
 }
@@ -58,8 +58,8 @@ export function assertAndroidDevice() {
 
   if (!devices.length) {
     throw new Error([
-      '没有检测到已连接的安卓模拟器。',
-      '请先启动模拟器，并确认 npm run android:devices 能看到 emulator-xxxx device。'
+      'No connected Android emulator was detected.',
+      'Start the emulator first, then confirm npm run android:devices shows emulator-xxxx device.'
     ].join('\n'));
   }
 }
@@ -219,23 +219,23 @@ function toFriendlyConnectError(error) {
 
   if (message.includes('ECONNREFUSED') || message.includes('Unable to connect')) {
     return [
-      '无法连接 Appium 服务。',
-      '请先运行：npm run appium:start',
-      '然后保持该终端打开，再另开终端运行 android:inspect 或 import:android。'
+      'Cannot connect to the Appium server.',
+      'Run: npm run appium:start',
+      'Keep that terminal open, then run android:inspect or import:android from another terminal.'
     ].join('\n');
   }
 
   if (message.includes('Could not find a connected Android device') || message.includes('No connected devices')) {
     return [
-      'Appium 已连接，但没有可用安卓设备。',
-      '请先启动安卓模拟器，并确认 adb devices -l 能看到 emulator 设备。'
+      'Appium is connected, but no Android device is available.',
+      'Start the Android emulator first, then confirm adb devices -l shows an emulator device.'
     ].join('\n');
   }
 
   if (message.includes('uiautomator2') || message.includes('UiAutomator2')) {
     return [
-      'UiAutomator2 驱动不可用。',
-      '请运行：npm run appium:setup'
+      'The UiAutomator2 driver is unavailable.',
+      'Run: npm run appium:setup'
     ].join('\n');
   }
 

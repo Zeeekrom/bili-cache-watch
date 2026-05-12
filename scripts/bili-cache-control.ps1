@@ -39,7 +39,7 @@ function Start-Server {
 function Start-Tunnel {
   Ensure-DataDir
   if (!(Test-Path $cloudflared)) {
-    throw "找不到 cloudflared.exe：$cloudflared"
+    throw "cloudflared.exe was not found: $cloudflared"
   }
   if (Get-TunnelProcess) { return }
   Remove-Item $tunnelOut, $tunnelErr -ErrorAction SilentlyContinue
@@ -75,8 +75,8 @@ function Refresh-Status {
   $tunnel = Get-TunnelProcess
   $url = Get-TunnelUrl
 
-  $serverLabel.Text = if ($server) { "网站：运行中 (PID $($server.ProcessId))" } else { "网站：未运行" }
-  $tunnelLabel.Text = if ($tunnel) { "公网隧道：运行中 (PID $($tunnel.Id))" } else { "公网隧道：未运行" }
+  $serverLabel.Text = if ($server) { "Web app: running (PID $($server.ProcessId))" } else { "Web app: stopped" }
+  $tunnelLabel.Text = if ($tunnel) { "Public tunnel: running (PID $($tunnel.Id))" } else { "Public tunnel: stopped" }
   $urlBox.Text = $url
   $openPublicButton.Enabled = [bool]$url
   $copyButton.Enabled = [bool]$url
@@ -87,7 +87,7 @@ function Show-Error($message) {
 }
 
 $form = New-Object System.Windows.Forms.Form
-$form.Text = "Bili Cache Watch 控制面板"
+$form.Text = "Bili Cache Watch Control Panel"
 $form.Size = New-Object System.Drawing.Size(620, 330)
 $form.StartPosition = "CenterScreen"
 $form.Font = New-Object System.Drawing.Font("Microsoft YaHei UI", 10)
@@ -101,7 +101,7 @@ $tunnelLabel.Location = New-Object System.Drawing.Point(20, 50)
 $tunnelLabel.Size = New-Object System.Drawing.Size(560, 26)
 
 $urlLabel = New-Object System.Windows.Forms.Label
-$urlLabel.Text = "公网地址："
+$urlLabel.Text = "Public URL:"
 $urlLabel.Location = New-Object System.Drawing.Point(20, 88)
 $urlLabel.Size = New-Object System.Drawing.Size(90, 26)
 
@@ -111,7 +111,7 @@ $urlBox.Size = New-Object System.Drawing.Size(470, 26)
 $urlBox.ReadOnly = $true
 
 $startButton = New-Object System.Windows.Forms.Button
-$startButton.Text = "启动网站 + 公网隧道"
+$startButton.Text = "Start App + Public Tunnel"
 $startButton.Location = New-Object System.Drawing.Point(20, 130)
 $startButton.Size = New-Object System.Drawing.Size(180, 42)
 $startButton.Add_Click({
@@ -127,7 +127,7 @@ $startButton.Add_Click({
 })
 
 $stopButton = New-Object System.Windows.Forms.Button
-$stopButton.Text = "关闭全部"
+$stopButton.Text = "Stop All"
 $stopButton.Location = New-Object System.Drawing.Point(215, 130)
 $stopButton.Size = New-Object System.Drawing.Size(110, 42)
 $stopButton.Add_Click({
@@ -137,19 +137,19 @@ $stopButton.Add_Click({
 })
 
 $refreshButton = New-Object System.Windows.Forms.Button
-$refreshButton.Text = "刷新状态"
+$refreshButton.Text = "Refresh"
 $refreshButton.Location = New-Object System.Drawing.Point(340, 130)
 $refreshButton.Size = New-Object System.Drawing.Size(110, 42)
 $refreshButton.Add_Click({ Refresh-Status })
 
 $openLocalButton = New-Object System.Windows.Forms.Button
-$openLocalButton.Text = "打开本地"
+$openLocalButton.Text = "Open Local"
 $openLocalButton.Location = New-Object System.Drawing.Point(20, 188)
 $openLocalButton.Size = New-Object System.Drawing.Size(110, 38)
 $openLocalButton.Add_Click({ Start-Process $localUrl })
 
 $openPublicButton = New-Object System.Windows.Forms.Button
-$openPublicButton.Text = "打开公网"
+$openPublicButton.Text = "Open Public"
 $openPublicButton.Location = New-Object System.Drawing.Point(145, 188)
 $openPublicButton.Size = New-Object System.Drawing.Size(110, 38)
 $openPublicButton.Add_Click({
@@ -157,7 +157,7 @@ $openPublicButton.Add_Click({
 })
 
 $copyButton = New-Object System.Windows.Forms.Button
-$copyButton.Text = "复制公网地址"
+$copyButton.Text = "Copy Public URL"
 $copyButton.Location = New-Object System.Drawing.Point(270, 188)
 $copyButton.Size = New-Object System.Drawing.Size(140, 38)
 $copyButton.Add_Click({
@@ -165,7 +165,7 @@ $copyButton.Add_Click({
 })
 
 $inviteLabel = New-Object System.Windows.Forms.Label
-$inviteLabel.Text = "邀请码：reeshiram-YuBirdSing-202605"
+$inviteLabel.Text = "Invite code: reeshiram-YuBirdSing-202605"
 $inviteLabel.Location = New-Object System.Drawing.Point(20, 245)
 $inviteLabel.Size = New-Object System.Drawing.Size(560, 26)
 

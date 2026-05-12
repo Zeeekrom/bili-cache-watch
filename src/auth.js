@@ -18,13 +18,13 @@ export function warnIfAuthDefaults() {
 export function loginPage(req, res) {
   const failed = req.query.failed === '1';
   res.type('html').send(`<!doctype html>
-<html lang="zh-CN">
+<html lang="en">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Bili Cache Watch 登录</title>
+    <title>Bili Cache Watch Login</title>
     <style>
-      :root { color-scheme: light; font-family: Inter, "Microsoft YaHei", Arial, sans-serif; background: #f6f7f9; color: #18202a; }
+      :root { color-scheme: light; font-family: Inter, Arial, sans-serif; background: #f6f7f9; color: #18202a; }
       * { box-sizing: border-box; }
       body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 24px; }
       main { width: min(420px, 100%); background: #fff; border: 1px solid #dfe5ed; border-radius: 10px; padding: 24px; }
@@ -40,13 +40,13 @@ export function loginPage(req, res) {
   <body>
     <main>
       <h1>Bili Cache Watch</h1>
-      <p>请输入邀请码后查看缓存视频监控页面。</p>
-      ${failed ? '<div class="error">邀请码不正确</div>' : ''}
+      <p>Enter the invite code to view the cached video monitor.</p>
+      ${failed ? '<div class="error">Invalid invite code.</div>' : ''}
       <form method="post" action="/login">
-        <input name="inviteCode" type="password" placeholder="邀请码" autocomplete="current-password" autofocus required>
-        <button type="submit">进入</button>
+        <input name="inviteCode" type="password" placeholder="Invite code" autocomplete="current-password" autofocus required>
+        <button type="submit">Enter</button>
       </form>
-      <div class="note">登录状态会保存在当前浏览器一段时间。</div>
+      <div class="note">Your login session is saved in this browser for a limited time.</div>
     </main>
   </body>
 </html>`);
@@ -54,7 +54,7 @@ export function loginPage(req, res) {
 
 export function handleLogin(req, res) {
   if (isRateLimited(req)) {
-    res.status(429).type('html').send('尝试次数过多，请稍后再试。');
+    res.status(429).type('html').send('Too many attempts. Please try again later.');
     return;
   }
 

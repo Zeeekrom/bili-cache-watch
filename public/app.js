@@ -25,7 +25,7 @@ addForm.addEventListener('submit', async (event) => {
   const bvid = raw.match(/BV[a-zA-Z0-9]{10}/)?.[0];
 
   if (!bvid) {
-    alert('没有识别到 BV 号');
+    alert('No BV ID was detected.');
     return;
   }
 
@@ -46,15 +46,15 @@ addForm.addEventListener('submit', async (event) => {
 
 checkAllButton.addEventListener('click', async () => {
   checkAllButton.disabled = true;
-  checkAllButton.textContent = '检查中';
+  checkAllButton.textContent = 'Checking';
   await fetch('/api/check-all', { method: 'POST' });
   checkAllButton.disabled = false;
-  checkAllButton.textContent = '全部检查';
+  checkAllButton.textContent = 'Check All';
   await loadVideos();
 });
 
 importAndroidButton.addEventListener('click', async () => {
-  await runImport(importAndroidButton, '正在读取模拟器缓存', async () => {
+  await runImport(importAndroidButton, 'Reading emulator cache', async () => {
     return postJson('/api/import/android', {});
   });
 });
@@ -65,12 +65,12 @@ localImportForm.addEventListener('submit', async (event) => {
   const path = form.get('path').trim();
 
   if (!path) {
-    setImportStatus('请先填写本地缓存目录路径', 'error');
+    setImportStatus('Enter a local cache folder path first.', 'error');
     return;
   }
 
   const button = localImportForm.querySelector('button');
-  await runImport(button, '正在扫描本地路径', async () => {
+  await runImport(button, 'Scanning local folder', async () => {
     return postJson('/api/import/local', { path });
   });
 });
@@ -81,12 +81,12 @@ phoneImportForm.addEventListener('submit', async (event) => {
   const path = form.get('path').trim();
 
   if (!path) {
-    setImportStatus('请先填写真实手机缓存路径', 'error');
+    setImportStatus('Enter the phone cache path first.', 'error');
     return;
   }
 
   const button = phoneImportForm.querySelector('button');
-  await runImport(button, '正在从手机复制未导入缓存', async () => {
+  await runImport(button, 'Copying new phone cache items', async () => {
     return postJson('/api/import/phone-mtp', { path });
   });
 });
@@ -101,12 +101,12 @@ async function loadVideos() {
 
   videosEl.innerHTML = filtered.length
     ? filtered.map(renderVideo).join('')
-    : '<div class="panel">暂无视频</div>';
+    : '<div class="panel">No videos yet.</div>';
 
   videosEl.querySelectorAll('[data-check-id]').forEach((button) => {
     button.addEventListener('click', async () => {
       button.disabled = true;
-      button.textContent = '检查中';
+      button.textContent = 'Checking';
       await fetch(`/api/videos/${button.dataset.checkId}/check`, { method: 'POST' });
       await loadVideos();
     });
@@ -141,8 +141,8 @@ async function loadVideos() {
 function renderVideo(video) {
   const status = statusLabel(video.current_status);
   const title = escapeHtml(video.title || video.bvid);
-  const detail = escapeHtml(video.status_detail || '尚未检查');
-  const lastChecked = video.last_checked_at ? escapeHtml(video.last_checked_at) : '未检查';
+  const detail = escapeHtml(video.status_detail || 'Not checked yet');
+  const lastChecked = video.last_checked_at ? escapeHtml(video.last_checked_at) : 'Not checked';
   const cover = video.cache_path
     ? `/api/videos/${video.id}/cover`
     : (video.cover_url ? escapeHtml(video.cover_url.replace(/^http:\/\//, 'https://')) : '');
@@ -152,8 +152,8 @@ function renderVideo(video) {
   const abnormal = !['available', 'unknown'].includes(video.current_status);
   const cacheActions = abnormal && video.cache_path
     ? `
-      <button data-preview-id="${video.id}">在线预览</button>
-      <a class="button-link" href="/api/videos/${video.id}/download">下载 MP4</a>
+      <button data-preview-id="${video.id}">Preview</button>
+      <a class="button-link" href="/api/videos/${video.id}/download">Download MP4</a>
     `
     : '';
   const preview = abnormal && video.cache_path
@@ -163,12 +163,12 @@ function renderVideo(video) {
           <video controls preload="metadata" src="/api/videos/${video.id}/preview"></video>
         </div>
         <div class="danmaku-controls">
-          <label>大小 <input type="range" min="16" max="36" value="25" data-danmaku-control data-video-id="${video.id}" data-control="size"></label>
-          <label>速度 <input type="range" min="80" max="260" value="160" data-danmaku-control data-video-id="${video.id}" data-control="speed"></label>
-          <label>透明度 <input type="range" min="30" max="100" value="100" data-danmaku-control data-video-id="${video.id}" data-control="opacity"></label>
-          <button type="button" data-danmaku-fullscreen data-video-id="${video.id}">弹幕全屏</button>
+          <label>Size <input type="range" min="16" max="36" value="25" data-danmaku-control data-video-id="${video.id}" data-control="size"></label>
+          <label>Speed <input type="range" min="80" max="260" value="160" data-danmaku-control data-video-id="${video.id}" data-control="speed"></label>
+          <label>Opacity <input type="range" min="30" max="100" value="100" data-danmaku-control data-video-id="${video.id}" data-control="opacity"></label>
+          <button type="button" data-danmaku-fullscreen data-video-id="${video.id}">Danmaku Fullscreen</button>
         </div>
-        <div id="danmaku-status-${video.id}" class="danmaku-status">弹幕加载中</div>
+        <div id="danmaku-status-${video.id}" class="danmaku-status">Loading danmaku</div>
       </div>
     `
     : '';
@@ -182,15 +182,15 @@ function renderVideo(video) {
           <div class="meta">
             <a href="${video.url}" target="_blank" rel="noreferrer">${video.bvid}</a>
             <span>${detail}</span>
-            <span>最后检查：${lastChecked}</span>
-            <span>来源：${escapeHtml(video.source)}</span>
+            <span>Last checked: ${lastChecked}</span>
+            <span>Source: ${escapeHtml(video.source)}</span>
           </div>
         </div>
         ${preview}
       </div>
       <div class="actions">
         <span class="status ${video.current_status}">${status}</span>
-        <button data-check-id="${video.id}">检查</button>
+        <button data-check-id="${video.id}">Check</button>
         ${cacheActions}
       </div>
     </article>
@@ -218,7 +218,7 @@ async function setupDanmaku(videoId) {
   const response = await fetch(`/api/videos/${videoId}/danmaku`);
   const data = await response.json().catch(() => ({ comments: [] }));
   if (!data.comments?.length) {
-    setDanmakuStatus(videoId, '未找到本地弹幕');
+    setDanmakuStatus(videoId, 'No local danmaku found');
     return;
   }
 
@@ -240,7 +240,7 @@ async function setupDanmaku(videoId) {
     media,
     container
   });
-  setDanmakuStatus(videoId, `已加载 ${data.comments.length} 条本地弹幕`);
+  setDanmakuStatus(videoId, `Loaded ${data.comments.length} local danmaku comments`);
 }
 
 function updateDanmaku(videoId) {
@@ -342,12 +342,12 @@ async function runImport(button, loadingText, action) {
       const names = result.videos
         .slice(0, 5)
         .map((video) => video.title || video.bvid)
-        .join('；');
-      const suffix = names ? `：${names}` : '';
+        .join('; ');
+      const suffix = names ? `: ${names}` : '';
       const phoneExtra = Number.isFinite(result.copied)
-        ? `，复制 ${result.copied} 个，跳过已导入 ${result.skippedExisting || 0} 个`
+        ? `, copied ${result.copied}, skipped ${result.skippedExisting || 0} existing`
         : '';
-      setImportStatus(`扫描 ${result.phoneScanned || result.scanned} 个缓存文件${phoneExtra}，导入/更新 ${result.imported} 个视频${suffix}`, 'ok');
+      setImportStatus(`Scanned ${result.phoneScanned || result.scanned} cache files${phoneExtra}, imported or updated ${result.imported} videos${suffix}`, 'ok');
       await loadVideos();
     }
   } catch (error) {
@@ -366,7 +366,7 @@ async function postJson(url, body) {
   });
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
-    return { error: data.error || `请求失败：HTTP ${response.status}` };
+    return { error: data.error || `Request failed: HTTP ${response.status}` };
   }
   return data;
 }
@@ -378,11 +378,11 @@ function setImportStatus(message, state = '') {
 
 function statusLabel(status) {
   return {
-    available: '正常',
-    removed: '疑似删除',
-    restricted: '受限',
-    error: '异常',
-    unknown: '未知'
+    available: 'Available',
+    removed: 'Possibly Removed',
+    restricted: 'Restricted',
+    error: 'Error',
+    unknown: 'Unknown'
   }[status] || status;
 }
 

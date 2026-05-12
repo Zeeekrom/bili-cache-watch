@@ -23,19 +23,19 @@ if (downloadResult.imported > 0 || mode === 'files') {
 const client = await connectAndroid();
 
 try {
-  console.log('Connected to Android. 请打开 Bilibili；如果当前在“我的”页，脚本会自动进入离线缓存。');
+  console.log('Connected to Android. Open Bilibili; if the current screen is the profile tab, the script will try to open offline cache automatically.');
   await ensureCachePage(client);
 
   const visibleResult = await importVisibleBvids(client);
 
   if (visibleResult.empty) {
-    console.log('Imported 0 video(s). 请先在这个模拟器里的 Bilibili App 缓存几个视频。');
+    console.log('Imported 0 video(s). Cache a few videos in the Bilibili app on this emulator first.');
     process.exitCode = 0;
   } else if (visibleResult.imported > 0 || mode === 'visible') {
     console.log(`Imported ${visibleResult.imported} video(s) from visible UI text.`);
     process.exitCode = 0;
   } else {
-    console.log('当前 UI 文本没有直接暴露 BV 号，开始尝试“点开条目 -> 分享 -> 复制链接”的导入流程。');
+    console.log('The current UI text does not expose BV IDs directly. Trying the item -> share -> copy link import flow.');
     const playlistResult = await importOfflinePlaylistByMoreMenu(client);
     const shareResult = playlistResult.imported > 0
       ? playlistResult
@@ -44,12 +44,12 @@ try {
 
     if (shareResult.imported === 0) {
       const { xmlPath, screenshotPath } = await dumpAndroidState(client, 'android-import-failed');
-      console.log('仍未导入到 BV。已保存诊断文件：');
+      console.log('No BV ID was imported. Diagnostic files were saved:');
       console.log(`XML: ${xmlPath}`);
       if (screenshotPath) {
         console.log(`Screenshot: ${screenshotPath}`);
       }
-      console.log('把模拟器停在缓存列表页后运行 npm run android:inspect，可以看到可点击控件，方便继续适配。');
+      console.log('Keep the emulator on the cache list page and run npm run android:inspect to inspect clickable controls for further adaptation.');
     }
   }
 } finally {
@@ -60,17 +60,17 @@ async function ensureCachePage(client) {
   let nodes = parseNodes(await client.getPageSource());
   let text = visibleTextLines(nodes).join('\n');
 
-  if (text.includes('离线缓存') && (text.includes('这里还什么都没有') || text.includes('缓存管理') || text.includes('已缓存'))) {
+  if (text.includes('\u79bb\u7ebf\u7f13\u5b58') && (text.includes('\u8fd9\u91cc\u8fd8\u4ec0\u4e48\u90fd\u6ca1\u6709') || text.includes('\u7f13\u5b58\u7ba1\u7406') || text.includes('\u5df2\u7f13\u5b58'))) {
     return;
   }
 
   const mineTab = nodes.find((node) => {
     const label = `${node.text} ${node.desc}`.trim();
-    return node.clickable && label.includes('我的');
+    return node.clickable && label.includes('\u6211\u7684');
   });
 
-  if (mineTab && !text.includes('离线缓存')) {
-    console.log('Found 我的 tab; opening it.');
+  if (mineTab && !text.includes('\u79bb\u7ebf\u7f13\u5b58')) {
+    console.log('Found profile tab; opening it.');
     await tapNode(client, mineTab);
     await client.pause(1800);
     nodes = parseNodes(await client.getPageSource());
@@ -79,11 +79,11 @@ async function ensureCachePage(client) {
 
   const cacheEntry = nodes.find((node) => {
     const label = `${node.text} ${node.desc}`.trim();
-    return node.clickable && label.includes('离线缓存');
+    return node.clickable && label.includes('\u79bb\u7ebf\u7f13\u5b58');
   });
 
   if (cacheEntry) {
-    console.log('Found 离线缓存 entry; opening it.');
+    console.log('Found offline cache entry; opening it.');
     await tapNode(client, cacheEntry);
     await client.pause(1800);
   }
@@ -96,7 +96,7 @@ async function importVisibleBvids(client) {
     const xml = await client.getPageSource();
     const nodes = parseNodes(xml);
     if (isEmptyCachePage(nodes)) {
-      console.log('离线缓存页是空的：这里还什么都没有呢～');
+      console.log('The offline cache page is empty.');
       return { imported: 0, empty: true };
     }
     if (findOfflinePlaylistItems(nodes).length > 0) {
@@ -161,7 +161,7 @@ async function importByShareFlow(client) {
   for (let scrollIndex = 0; scrollIndex < maxScrolls && seen.size < maxShareAttempts; scrollIndex += 1) {
     const nodes = parseNodes(await client.getPageSource());
     if (isEmptyCachePage(nodes)) {
-      console.log('离线缓存页是空的，请先在这个模拟器里的 Bilibili App 缓存几个视频。');
+      console.log('The offline cache page is empty. Cache a few videos in the Bilibili app on this emulator first.');
       break;
     }
     const candidates = findVideoCandidates(nodes).filter((node) => !attemptedKeys.has(candidateKey(node)));
@@ -194,7 +194,7 @@ async function openMoreMenuDetailAndCopyBvid(client, item) {
   await client.pause(600);
 
   let nodes = parseNodes(await client.getPageSource());
-  const detailNode = findActionNode(nodes, ['查看详情页', '详情页', 'detail']);
+  const detailNode = findActionNode(nodes, ['\u67e5\u770b\u8be6\u60c5\u9875', '\u8be6\u60c5\u9875', 'detail']);
   if (!detailNode) {
     await client.back();
     return null;
@@ -290,7 +290,21 @@ function upsertSeen(seen, source) {
 }
 
 function findVideoCandidates(nodes) {
-  const ignored = /^(全部|编辑|删除|缓存|缓存设置|已缓存|下载|暂停|继续|清晰度|返回|搜索|管理)$/;
+  const ignored = new RegExp('^(' + [
+    '\u5168\u90e8',
+    '\u7f16\u8f91',
+    '\u5220\u9664',
+    '\u7f13\u5b58',
+    '\u7f13\u5b58\u8bbe\u7f6e',
+    '\u5df2\u7f13\u5b58',
+    '\u4e0b\u8f7d',
+    '\u6682\u505c',
+    '\u7ee7\u7eed',
+    '\u6e05\u6670\u5ea6',
+    '\u8fd4\u56de',
+    '\u641c\u7d22',
+    '\u7ba1\u7406'
+  ].join('|') + ')$');
 
   return nodes
     .filter((node) => node.enabled && node.bounds.width > 180 && node.bounds.height > 32)
@@ -300,7 +314,7 @@ function findVideoCandidates(nodes) {
       if (!label || ignored.test(label)) {
         return false;
       }
-      if (label.includes('这里还什么都没有') || label === 'placeholder') {
+      if (label.includes('\u8fd9\u91cc\u8fd8\u4ec0\u4e48\u90fd\u6ca1\u6709') || label === 'placeholder') {
         return false;
       }
       if (/^\d+(\.\d+)?[KMG]?B?$/.test(label) || /^\d{1,2}:\d{2}$/.test(label)) {
@@ -313,15 +327,15 @@ function findVideoCandidates(nodes) {
 
 function findShareNode(nodes) {
   return findActionNode(nodes, [
-    '分享',
+    '\u5206\u4eab',
     'share'
   ]);
 }
 
 function findCopyLinkNode(nodes) {
   return findActionNode(nodes, [
-    '复制链接',
-    '复制',
+    '\u590d\u5236\u94fe\u63a5',
+    '\u590d\u5236',
     'copy link',
     'copy'
   ]);
@@ -399,7 +413,7 @@ function maybeDecodeBase64(value) {
 async function returnToCacheList(client) {
   for (let i = 0; i < 3; i += 1) {
     const text = visibleTextLines(parseNodes(await client.getPageSource())).join('\n');
-    if (text.includes('缓存') || text.includes('离线')) {
+    if (text.includes('\u7f13\u5b58') || text.includes('\u79bb\u7ebf')) {
       return;
     }
     await client.back();
@@ -412,5 +426,5 @@ function candidateKey(node) {
 }
 
 function isEmptyCachePage(nodes) {
-  return visibleTextLines(nodes).some((line) => line.includes('这里还什么都没有'));
+  return visibleTextLines(nodes).some((line) => line.includes('\u8fd9\u91cc\u8fd8\u4ec0\u4e48\u90fd\u6ca1\u6709'));
 }
