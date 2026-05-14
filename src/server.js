@@ -7,6 +7,7 @@ import { ensureMergedMp4, findCacheCover, readDanmaku, warmMergedMp4 } from './c
 import { importFromAndroidDownloadEntries, importFromLocalCachePath } from './importers/download-metadata.js';
 import { importFromPhoneMtp } from './importers/phone-mtp.js';
 import { handleLogin, handleLogout, loginPage, requireAuth, warnIfAuthDefaults } from './auth.js';
+import { normaliseLanguage, translateVideoTitles } from './translation.js';
 
 const app = express();
 const port = Number(process.env.PORT || 3000);
@@ -22,8 +23,10 @@ app.use(requireAuth);
 app.use(express.static('public'));
 app.use('/vendor/danmaku', express.static('node_modules/danmaku/dist'));
 
-app.get('/api/videos', (_req, res) => {
-  res.json({ videos: listVideos() });
+app.get('/api/videos', async (req, res) => {
+  const language = normaliseLanguage(req.query.lang);
+  const videos = await translateVideoTitles(listVideos(), language);
+  res.json({ language, videos });
 });
 
 app.post('/api/videos', (req, res) => {

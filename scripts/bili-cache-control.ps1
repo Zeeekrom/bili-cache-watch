@@ -16,13 +16,30 @@ function Ensure-DataDir {
 }
 
 function Get-ServerProcess {
-  Get-CimInstance Win32_Process |
-    Where-Object { $_.CommandLine -like "*New project 4*src/server.js*" } |
+  $server = Get-CimInstance Win32_Process |
+    Where-Object { $_.CommandLine -like "*src/server.js*" -and $_.CommandLine -like "*$root*" } |
+    Select-Object -First 1
+  if ($server) { return $server }
+
+  Get-LocalPortProcessIds | ForEach-Object {
+    Get-CimInstance Win32_Process -Filter "ProcessId = $_" -ErrorAction SilentlyContinue
+  } |
+    Where-Object { $_.Name -eq "node.exe" } |
     Select-Object -First 1
 }
 
 function Get-TunnelProcess {
-  Get-Process cloudflared -ErrorAction SilentlyContinue | Select-Object -First 1
+  $cloudflaredName = [System.IO.Path]::GetFileNameWithoutExtension($cloudflared)
+  Get-CimInstance Win32_Process |
+    Where-Object {
+      $_.Name -eq "$cloudflaredName.exe" -and
+      ($_.ExecutablePath -eq $cloudflared -or $_.CommandLine -like "*--url $localUrl*")
+    }
+}
+
+function Get-LocalPortProcessIds {
+  Get-NetTCPConnection -LocalPort 3001 -State Listen -ErrorAction SilentlyContinue |
+    Select-Object -ExpandProperty OwningProcess -Unique
 }
 
 function Start-Server {
@@ -52,11 +69,17 @@ function Start-Tunnel {
 }
 
 function Stop-All {
-  Get-TunnelProcess | Stop-Process -ErrorAction SilentlyContinue
+  Get-TunnelProcess | ForEach-Object {
+    Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue
+  }
   $server = Get-ServerProcess
   if ($server) {
-    Stop-Process -Id $server.ProcessId -ErrorAction SilentlyContinue
+    Stop-Process -Id $server.ProcessId -Force -ErrorAction SilentlyContinue
   }
+  Get-LocalPortProcessIds | ForEach-Object {
+    Stop-Process -Id $_ -Force -ErrorAction SilentlyContinue
+  }
+  Remove-Item $tunnelOut, $tunnelErr -ErrorAction SilentlyContinue
 }
 
 function Get-TunnelUrl {
@@ -72,14 +95,14 @@ function Get-TunnelUrl {
 
 function Refresh-Status {
   $server = Get-ServerProcess
-  $tunnel = Get-TunnelProcess
-  $url = Get-TunnelUrl
+  $tunnel = @(Get-TunnelProcess)
+  $url = if ($tunnel.Count -gt 0) { Get-TunnelUrl } else { "" }
 
   $serverLabel.Text = if ($server) { "Web app: running (PID $($server.ProcessId))" } else { "Web app: stopped" }
-  $tunnelLabel.Text = if ($tunnel) { "Public tunnel: running (PID $($tunnel.Id))" } else { "Public tunnel: stopped" }
+  $tunnelLabel.Text = if ($tunnel.Count -gt 0) { "Public tunnel: running (PID $($tunnel[0].ProcessId))" } else { "Public tunnel: stopped" }
   $urlBox.Text = $url
-  $openPublicButton.Enabled = [bool]$url
-  $copyButton.Enabled = [bool]$url
+  $openPublicButton.Enabled = ($tunnel.Count -gt 0 -and [bool]$url)
+  $copyButton.Enabled = ($tunnel.Count -gt 0 -and [bool]$url)
 }
 
 function Show-Error($message) {

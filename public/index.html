@@ -1,65 +1,65 @@
 <!doctype html>
-<html lang="en">
+<html lang="zh-Hans">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Bili Cache Watch</title>
-    <link rel="stylesheet" href="/styles.css?v=english-ui">
+    <link rel="stylesheet" href="/styles.css?v=language-ui">
   </head>
   <body>
     <main class="shell">
       <header class="topbar">
         <div>
           <h1>Bili Cache Watch</h1>
-          <p>Import cached Bilibili BV IDs, check status, and review removed or restricted videos.</p>
+          <p data-i18n="subtitle">导入哔哩哔哩缓存 BV 号，检查视频状态，并预览本地缓存的异常视频。</p>
         </div>
         <div class="top-actions">
-          <button id="checkAll">Check All</button>
+          <button id="languageToggle" type="button">繁體中文</button>
+          <button id="checkAll" data-i18n="checkAll">全部检查</button>
           <form method="post" action="/logout">
-            <button type="submit">Log Out</button>
+            <button type="submit" data-i18n="logout">退出登录</button>
           </form>
         </div>
       </header>
 
       <section class="panel">
         <form id="addForm" class="add-form">
-          <input name="bvid" placeholder="BV ID or video URL" required>
-          <input name="title" placeholder="Title, optional">
-          <button type="submit">Add</button>
+          <input name="bvid" data-i18n-placeholder="bvidPlaceholder" placeholder="BV 号或视频网址" required>
+          <input name="title" data-i18n-placeholder="titlePlaceholder" placeholder="标题，可选">
+          <button type="submit" data-i18n="add">添加</button>
         </form>
       </section>
 
       <section class="panel import-panel">
         <div class="section-head">
           <div>
-            <h2>Cache Import</h2>
-            <p>Read Bilibili entry.json files from an Android emulator or a local cache folder.</p>
+            <h2 data-i18n="cacheImport">缓存导入</h2>
+            <p data-i18n="cacheImportText">从安卓模拟器或本地缓存文件夹读取哔哩哔哩 entry.json 文件。</p>
           </div>
-          <button id="importAndroid">Import From Android Emulator</button>
+          <button id="importAndroid" data-i18n="importAndroid">从安卓模拟器导入</button>
         </div>
         <form id="localImportForm" class="local-import-form">
-          <input name="path" placeholder="Local cache folder, for example D:\BiliCache\download or an exported tv.danmaku.bili\download folder">
-          <button type="submit">Import Local Folder</button>
+          <input name="path" data-i18n-placeholder="localPathPlaceholder" placeholder="本地缓存文件夹，例如 D:\BiliCache\download 或导出的 tv.danmaku.bili\download 文件夹">
+          <button type="submit" data-i18n="importLocal">导入本地文件夹</button>
         </form>
         <form id="phoneImportForm" class="phone-import-form">
           <input name="path" value="This PC\REDMI K90 Pro Max\Internal shared storage\Android\data\tv.danmaku.bili\download">
-          <button type="submit">Copy and Import From Phone</button>
+          <button type="submit" data-i18n="importPhone">从手机复制并导入</button>
         </form>
-        <div class="hint">Before importing from a real phone, connect the USB cable, allow file access on the phone, and make sure the path above points to the Bilibili download cache folder.</div>
-        <div id="importStatus" class="import-status">Waiting for import</div>
+        <div class="hint" data-i18n="phoneHint">从真机导入前，请连接 USB 数据线，在手机上允许文件访问，并确认上方路径指向哔哩哔哩下载缓存文件夹。</div>
+        <div id="importStatus" class="import-status" data-i18n="waitingImport">等待导入</div>
       </section>
 
       <section class="toolbar">
-        <button data-filter="all" class="active">All</button>
-        <button data-filter="removed">Possibly Removed</button>
-        <button data-filter="restricted">Restricted</button>
-        <button data-filter="available">Available</button>
+        <button data-filter="all" class="active" data-i18n="all">全部</button>
+        <button data-filter="removed" data-i18n="removed">可能已失效</button>
+        <button data-filter="available" data-i18n="available">可访问</button>
       </section>
 
       <section id="videos" class="video-list"></section>
     </main>
 
     <script src="/vendor/danmaku/danmaku.min.js"></script>
-    <script src="/app.js?v=english-ui"></script>
+    <script src="/app.js?v=language-ui"></script>
   </body>
 </html>

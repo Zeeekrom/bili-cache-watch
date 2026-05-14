@@ -40,6 +40,14 @@ db.exec(`
 
 ensureColumn('videos', 'cover_url', 'TEXT');
 ensureColumn('videos', 'cache_path', 'TEXT');
+ensureColumn('videos', 'title_zh_hant', 'TEXT');
+ensureColumn('videos', 'title_en_au', 'TEXT');
+ensureColumn('videos', 'title_translation_source', 'TEXT');
+
+const titleColumns = {
+  'zh-Hant': 'title_zh_hant',
+  'en-AU': 'title_en_au'
+};
 
 export function listVideos() {
   return db.prepare(`
@@ -88,6 +96,33 @@ export function upsertVideo({ bvid, title = null, url, source = 'manual', coverU
   `).run(cleanBvid, title, cleanUrl, source, coverUrl, cachePath);
 
   return db.prepare('SELECT * FROM videos WHERE bvid = ?').get(cleanBvid);
+}
+
+export function updateVideoTitleTranslations(videoId, sourceTitle, translations) {
+  const sets = [];
+  const values = [];
+
+  for (const [language, title] of Object.entries(translations || {})) {
+    const column = titleColumns[language];
+    if (column && title) {
+      sets.push(`${column} = ?`);
+      values.push(title);
+    }
+  }
+
+  if (!sets.length) {
+    return;
+  }
+
+  sets.push('title_translation_source = ?');
+  sets.push('updated_at = CURRENT_TIMESTAMP');
+  values.push(sourceTitle || null, videoId);
+
+  db.prepare(`
+    UPDATE videos
+    SET ${sets.join(', ')}
+    WHERE id = ?
+  `).run(...values);
 }
 
 export function updateCheckResult(video, result) {

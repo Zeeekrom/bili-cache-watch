@@ -83,6 +83,33 @@ Cloud platforms need these environment variables:
 
 The app also needs persistent storage mounted at `/app/data`.
 
+## Language Switching and Video Title Translation
+
+The web UI defaults to Simplified Chinese and can switch between Simplified Chinese, Traditional Chinese, and Australian English. UI labels are translated in the browser, while video titles are translated by the server and cached in SQLite.
+
+Traditional Chinese titles are converted locally with OpenCC, so they work offline in local and internet deployments.
+
+Australian English titles use a LibreTranslate-compatible HTTP service. If no service is configured, the app still works and falls back to the original title until a translation service is available. Configure it with:
+
+```powershell
+$env:LIBRETRANSLATE_URL="http://localhost:5000"
+$env:LIBRETRANSLATE_API_KEY=""
+npm run dev
+```
+
+For Docker or cloud deployments, set the same environment variables:
+
+- `LIBRETRANSLATE_URL=https://your-translate-service.example.com`
+- `LIBRETRANSLATE_API_KEY=your-key-if-required`
+
+Run a local LibreTranslate service with Docker:
+
+```powershell
+docker run -d --name libretranslate -p 5000:5000 libretranslate/libretranslate
+```
+
+Translation results are cached per title. If a video title changes after re-checking or re-importing, the cached translations are refreshed the next time that language is requested.
+
 ## Android Emulator Import
 
 1. Start an Android emulator and log in to the Bilibili app.
