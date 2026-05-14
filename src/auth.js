@@ -48,6 +48,7 @@ export function loginPage(req, res) {
         <input name="inviteCode" type="password" placeholder="邀请码" autocomplete="current-password" autofocus required>
         <button type="submit">进入</button>
       </form>
+      <div class="version">Bili Cache Watch ${APP_VERSION_LABEL}</div>
       <div class="note">登录状态会在此浏览器中保留一段时间。</div>
     </main>
   </body>

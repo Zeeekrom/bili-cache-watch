@@ -11,6 +11,18 @@ $tunnelOut = Join-Path $root "data\cloudflared.out.log"
 $tunnelErr = Join-Path $root "data\cloudflared.err.log"
 $localUrl = "http://localhost:3001"
 
+function Get-AppVersion {
+  $packageJson = Join-Path $root "package.json"
+  if (!(Test-Path $packageJson)) { return "unknown" }
+  try {
+    return "v$((Get-Content $packageJson -Raw | ConvertFrom-Json).version)"
+  } catch {
+    return "unknown"
+  }
+}
+
+$appVersion = Get-AppVersion
+
 function Ensure-DataDir {
   New-Item -ItemType Directory -Force (Join-Path $root "data") | Out-Null
 }
@@ -110,7 +122,7 @@ function Show-Error($message) {
 }
 
 $form = New-Object System.Windows.Forms.Form
-$form.Text = "Bili Cache Watch Control Panel"
+$form.Text = "Bili Cache Watch Control Panel $appVersion"
 $form.Size = New-Object System.Drawing.Size(620, 330)
 $form.StartPosition = "CenterScreen"
 $form.Font = New-Object System.Drawing.Font("Microsoft YaHei UI", 10)
@@ -190,7 +202,12 @@ $copyButton.Add_Click({
 $inviteLabel = New-Object System.Windows.Forms.Label
 $inviteLabel.Text = "Invite code: reeshiram-YuBirdSing-202605"
 $inviteLabel.Location = New-Object System.Drawing.Point(20, 245)
-$inviteLabel.Size = New-Object System.Drawing.Size(560, 26)
+$inviteLabel.Size = New-Object System.Drawing.Size(390, 26)
+
+$versionLabel = New-Object System.Windows.Forms.Label
+$versionLabel.Text = "Version: $appVersion"
+$versionLabel.Location = New-Object System.Drawing.Point(430, 245)
+$versionLabel.Size = New-Object System.Drawing.Size(150, 26)
 
 $form.Controls.AddRange(@(
   $serverLabel,
@@ -203,7 +220,8 @@ $form.Controls.AddRange(@(
   $openLocalButton,
   $openPublicButton,
   $copyButton,
-  $inviteLabel
+  $inviteLabel,
+  $versionLabel
 ))
 
 Refresh-Status

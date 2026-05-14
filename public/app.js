@@ -5,6 +5,7 @@ const videosEl = document.querySelector('#videos');
 const addForm = document.querySelector('#addForm');
 const checkAllButton = document.querySelector('#checkAll');
 const languageToggleButton = document.querySelector('#languageToggle');
+const appVersionEl = document.querySelector('#appVersion');
 const importAndroidButton = document.querySelector('#importAndroid');
 const localImportForm = document.querySelector('#localImportForm');
 const phoneImportForm = document.querySelector('#phoneImportForm');
@@ -332,6 +333,21 @@ async function loadVideos() {
   });
 }
 
+async function loadVersion() {
+  try {
+    const response = await fetch('/api/version', { cache: 'no-store' });
+    const version = await response.json();
+    if (appVersionEl && version.label) {
+      appVersionEl.textContent = version.label;
+      document.title = `Bili Cache Watch ${version.label}`;
+    }
+  } catch {
+    if (appVersionEl) {
+      appVersionEl.textContent = 'v?';
+    }
+  }
+}
+
 function renderVideo(video) {
   const status = statusLabel(video.current_status);
   const title = escapeHtml(video.display_title || video.title || video.bvid);
@@ -594,4 +610,5 @@ function escapeHtml(value) {
 }
 
 applyLanguage();
+loadVersion();
 loadVideos();
