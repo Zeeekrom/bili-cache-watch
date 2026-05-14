@@ -105,8 +105,10 @@ For Docker or cloud deployments, set the same environment variables:
 Run a local LibreTranslate service with Docker:
 
 ```powershell
-docker run -d --name libretranslate -p 5000:5000 libretranslate/libretranslate
+docker run -d --name libretranslate -p 5000:5000 libretranslate/libretranslate --load-only zh,en
 ```
+
+If Docker reports that it cannot connect to `dockerDesktopLinuxEngine`, start Docker Desktop first and wait until the engine is running, then run the command again.
 
 Translation results are cached per title. If a video title changes after re-checking or re-importing, the cached translations are refreshed the next time that language is requested.
 
