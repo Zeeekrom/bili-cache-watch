@@ -1,4 +1,5 @@
 import crypto from 'node:crypto';
+import { APP_VERSION_LABEL } from './version.js';
 
 const cookieName = 'bili_cache_auth';
 const defaultInviteCode = 'change-me';
@@ -35,6 +36,7 @@ export function loginPage(req, res) {
       button { min-height: 44px; border: 1px solid #1f6feb; border-radius: 8px; background: #1f6feb; color: #fff; font-weight: 700; cursor: pointer; }
       .error { margin-bottom: 12px; padding: 10px 12px; border-radius: 8px; background: #ffe9e8; color: #b42318; }
       .note { margin-top: 14px; font-size: 13px; color: #718096; }
+      .version { margin-top: 14px; font-size: 12px; color: #8a97a8; }
     </style>
   </head>
   <body>

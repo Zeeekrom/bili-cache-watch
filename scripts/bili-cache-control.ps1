@@ -61,7 +61,7 @@ function Start-Tunnel {
   if (Get-TunnelProcess) { return }
   Remove-Item $tunnelOut, $tunnelErr -ErrorAction SilentlyContinue
   Start-Process -FilePath $cloudflared `
-    -ArgumentList "tunnel", "--url", $localUrl, "--no-autoupdate" `
+    -ArgumentList "tunnel", "--url", $localUrl, "--protocol", "http2", "--no-autoupdate" `
     -WorkingDirectory $root `
     -RedirectStandardOutput $tunnelOut `
     -RedirectStandardError $tunnelErr `

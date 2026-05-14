@@ -8,6 +8,7 @@ import { importFromAndroidDownloadEntries, importFromLocalCachePath } from './im
 import { importFromPhoneMtp } from './importers/phone-mtp.js';
 import { handleLogin, handleLogout, loginPage, requireAuth, warnIfAuthDefaults } from './auth.js';
 import { normaliseLanguage, translateVideoTitles } from './translation.js';
+import { APP_VERSION, APP_VERSION_LABEL } from './version.js';
 
 const app = express();
 const port = Number(process.env.PORT || 3000);
@@ -19,8 +20,23 @@ app.use(express.urlencoded({ extended: false }));
 app.get('/login', loginPage);
 app.post('/login', handleLogin);
 app.post('/logout', handleLogout);
+app.get('/api/version', (_req, res) => {
+  res.json({
+    name: 'Bili Cache Watch',
+    version: APP_VERSION,
+    label: APP_VERSION_LABEL
+  });
+});
 app.use(requireAuth);
-app.use(express.static('public'));
+app.use(express.static('public', {
+  etag: false,
+  lastModified: false,
+  setHeaders(res, filePath) {
+    if (/\.(html|js|css)$/i.test(filePath)) {
+      res.setHeader('Cache-Control', 'no-store');
+    }
+  }
+}));
 app.use('/vendor/danmaku', express.static('node_modules/danmaku/dist'));
 
 app.get('/api/videos', async (req, res) => {
@@ -192,7 +208,7 @@ cron.schedule(`*/${intervalMinutes} * * * *`, async () => {
 
 app.listen(port, () => {
   warnIfAuthDefaults();
-  console.log(`Bili cache watch is running at http://localhost:${port}`);
+  console.log(`Bili cache watch ${APP_VERSION_LABEL} is running at http://localhost:${port}`);
   console.log(`Check interval: ${intervalMinutes} minute(s)`);
 });
 
