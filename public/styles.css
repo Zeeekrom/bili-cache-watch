@@ -81,6 +81,12 @@ h2 {
   letter-spacing: 0;
 }
 
+h3 {
+  margin: 0 0 8px;
+  font-size: 15px;
+  letter-spacing: 0;
+}
+
 button {
   border: 1px solid #cfd7e2;
   background: #ffffff;
@@ -121,6 +127,29 @@ button:hover {
   border-radius: 8px;
   padding: 16px;
   margin-bottom: 12px;
+}
+
+.project-panel {
+  display: grid;
+  gap: 14px;
+}
+
+.project-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.project-info {
+  border: 1px solid #dfe5ed;
+  border-radius: 8px;
+  padding: 14px;
+  background: #f8fafc;
+}
+
+.project-info p {
+  font-size: 14px;
+  line-height: 1.65;
 }
 
 .add-form {
@@ -401,7 +430,8 @@ input {
 
   .section-head,
   .local-import-form,
-  .phone-import-form {
+  .phone-import-form,
+  .project-grid {
     grid-template-columns: 1fr;
     display: grid;
     align-items: stretch;

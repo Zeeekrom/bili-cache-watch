@@ -33,6 +33,29 @@
         </form>
       </section>
 
+      <section class="panel project-panel">
+        <div class="section-head">
+          <div>
+            <h2 data-i18n="projectIntroTitle">项目说明</h2>
+            <p data-i18n="projectIntroText">Bili Cache Watch 是一个本地运行的哔哩哔哩缓存管理工具，用来导入缓存视频、检查公开视频状态，并在视频异常时保留本地预览入口。</p>
+          </div>
+        </div>
+        <div class="project-grid">
+          <article class="project-info">
+            <h3 data-i18n="projectBasicTitle">基本介绍</h3>
+            <p data-i18n="projectBasicText">项目面向本地缓存整理场景：你可以手动添加 BV 号，也可以从模拟器、本地文件夹或 Windows MTP 手机路径读取 entry.json，集中管理缓存条目。</p>
+          </article>
+          <article class="project-info">
+            <h3 data-i18n="projectTechTitle">技术介绍</h3>
+            <p data-i18n="projectTechText">后端基于 Node.js、Express 和 SQLite，定时检查视频状态；导入模块解析缓存元数据，使用 ffmpeg 生成可预览的 MP4，并支持本地弹幕播放与标题翻译缓存。</p>
+          </article>
+          <article class="project-info">
+            <h3 data-i18n="projectUsageTitle">使用方法</h3>
+            <p data-i18n="projectUsageText">先运行 npm install 和 npm run dev，打开 localhost:3000；登录后添加 BV 号或导入缓存，再点击全部检查筛选异常视频，必要时使用预览或下载 MP4。</p>
+          </article>
+        </div>
+      </section>
+
       <section class="panel import-panel">
         <div class="section-head">
           <div>
