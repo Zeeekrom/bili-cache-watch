@@ -6,6 +6,7 @@ const defaultInviteCode = 'change-me';
 const inviteCode = process.env.BILI_INVITE_CODE || defaultInviteCode;
 const authSecret = process.env.BILI_AUTH_SECRET || crypto.createHash('sha256').update(inviteCode).digest('hex');
 const maxAgeMs = Number(process.env.BILI_AUTH_MAX_AGE_MS || 7 * 24 * 60 * 60 * 1000);
+const rememberedMaxAgeMs = Number(process.env.BILI_AUTH_REMEMBER_MAX_AGE_MS || 180 * 24 * 60 * 60 * 1000);
 const loginAttempts = new Map();
 const loginWindowMs = 10 * 60 * 1000;
 const maxLoginAttempts = 8;
@@ -33,6 +34,8 @@ export function loginPage(req, res) {
       p { margin: 0 0 18px; color: #617081; }
       form { display: grid; gap: 12px; }
       input { width: 100%; min-height: 44px; border: 1px solid #cfd7e2; border-radius: 8px; padding: 0 12px; font: inherit; }
+      .remember { display: inline-flex; align-items: center; gap: 8px; color: #526173; font-size: 14px; }
+      .remember input { width: 16px; min-height: 16px; accent-color: #1f6feb; }
       button { min-height: 44px; border: 1px solid #1f6feb; border-radius: 8px; background: #1f6feb; color: #fff; font-weight: 700; cursor: pointer; }
       .error { margin-bottom: 12px; padding: 10px 12px; border-radius: 8px; background: #ffe9e8; color: #b42318; }
       .note { margin-top: 14px; font-size: 13px; color: #718096; }
@@ -46,6 +49,10 @@ export function loginPage(req, res) {
       ${failed ? '<div class="error">邀请码无效。</div>' : ''}
       <form method="post" action="/login">
         <input name="inviteCode" type="password" placeholder="邀请码" autocomplete="current-password" autofocus required>
+        <label class="remember">
+          <input name="remember" type="checkbox" value="1">
+          <span>Remember it</span>
+        </label>
         <button type="submit">进入</button>
       </form>
       <div class="version">Bili Cache Watch ${APP_VERSION_LABEL}</div>
@@ -68,11 +75,12 @@ export function handleLogin(req, res) {
   }
 
   clearFailedLogins(req);
-  res.setHeader('Set-Cookie', serializeCookie(cookieName, createToken(), {
+  const cookieMaxAgeMs = req.body.remember === '1' ? rememberedMaxAgeMs : maxAgeMs;
+  res.setHeader('Set-Cookie', serializeCookie(cookieName, createToken(cookieMaxAgeMs), {
     httpOnly: true,
     sameSite: 'Lax',
     secure: isSecureRequest(req),
-    maxAge: Math.floor(maxAgeMs / 1000),
+    maxAge: Math.floor(cookieMaxAgeMs / 1000),
     path: '/'
   }));
   res.redirect('/');
@@ -102,8 +110,8 @@ export function requireAuth(req, res, next) {
   res.redirect('/login');
 }
 
-function createToken() {
-  const expiresAt = Date.now() + maxAgeMs;
+function createToken(tokenMaxAgeMs = maxAgeMs) {
+  const expiresAt = Date.now() + tokenMaxAgeMs;
   const payload = Buffer.from(JSON.stringify({ expiresAt })).toString('base64url');
   const signature = sign(payload);
   return `${payload}.${signature}`;
